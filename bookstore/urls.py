@@ -20,7 +20,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path, re_path
 import debug_toolbar
-
+from rest_framework.authtoken.views import obtain_auth_token
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -28,4 +28,5 @@ urlpatterns = [
     re_path("bookstore/(?P<version>(v1|v2))/", include("order.urls")),
     re_path("bookstore/(?P<version>(v1|v2))/", include("product.urls")),
     path("api/", include("product.urls")),
+    path("api-token-auth/", obtain_auth_token, name="api_token_auth"),
 ]
