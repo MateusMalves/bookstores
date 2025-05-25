@@ -1,3 +1,4 @@
+version: "3.9" # Use version 3.9 of the Docker Compose file format
 services:
   web:
     build: .
@@ -29,7 +30,7 @@ services:
 
 networks:
   backend:
-    driver: bridge
+    driver: bridge # Default bridge network
 
 volumes:
   postgres_data:

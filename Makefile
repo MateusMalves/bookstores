@@ -127,4 +127,4 @@ migrate:
 
 .PHONY: seed
 seed:
-	poetry run python manage.py seed
+    docker-compose exec web poetry run python manage.py seed
