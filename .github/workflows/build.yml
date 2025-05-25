@@ -10,7 +10,7 @@ jobs:
 
     services:
       db:
-        image: postgres:13
+        image: postgres:16
         env:
           POSTGRES_USER: postgres
           POSTGRES_PASSWORD: password
@@ -52,6 +52,14 @@ jobs:
 
       - name: Copiar variáveis de ambiente
         run: cp ./env.dev .env
+
+      - name: Esperar banco de dados
+        run: |
+          for i in {1..10}; do
+            pg_isready -h db -p 5432 -U postgres && break
+            echo "Aguardando PostgreSQL..."
+            sleep 3
+          done
 
       - name: Run migrations
         run: poetry run python manage.py migrate --noinput
