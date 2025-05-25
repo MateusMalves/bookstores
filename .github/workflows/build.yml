@@ -4,9 +4,12 @@ on: [push]
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: [3.8, 3.9]
+
     runs-on: ubuntu-latest
-    env:
-      DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1 [::1]"
 
     services:
       db:
@@ -23,32 +26,36 @@ jobs:
           --health-timeout=5s
           --health-retries=5
 
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: [3.13]
+    env:
+      DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1 [::1]"
+      SECRET_KEY: "dev-secret-key"
+      SQL_ENGINE: django.db.backends.postgresql
+      SQL_DATABASE: bookstore_dev_db
+      SQL_USER: bookstore_dev
+      SQL_PASSWORD: bookstore_dev
+      SQL_HOST: localhost
+      SQL_PORT: 5432
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v2
 
       - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v2
         with:
           python-version: ${{ matrix.python-version }}
 
-      - name: Cache Poetry virtualenvs
-        uses: actions/cache@v4
-        with:
-          path: .venv
-          key: ${{ runner.os }}-venv-${{ hashFiles('**/poetry.lock') }}
-
-      - name: Install Poetry
+      - name: Install poetry
         run: |
+          python -m ensurepip
           python -m pip install --upgrade pip
-          python -m pip install poetry
+          python -m pip install --upgrade poetry
+
+      - name: View poetry --help
+        run: poetry --help
 
       - name: Install dependencies
-        run: poetry install
+        shell: bash
+        run: python -m poetry install
 
       - name: Copiar variáveis de ambiente
         run: cp ./env.dev .env
@@ -56,7 +63,7 @@ jobs:
       - name: Esperar banco de dados
         run: |
           for i in {1..10}; do
-            pg_isready -h db -p 5432 -U bookstore_dev && break
+            pg_isready -h localhost -p 5432 -U bookstore_dev && break
             echo "Aguardando PostgreSQL..."
             sleep 3
           done
@@ -64,5 +71,5 @@ jobs:
       - name: Run migrations
         run: poetry run python manage.py migrate --noinput
 
-      - name: Run tests
+      - name: Test
         run: poetry run python manage.py test

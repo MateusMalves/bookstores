@@ -22,25 +22,39 @@ jobs:
           POSTGRES_PASSWORD: bookstore_dev
           POSTGRES_DB: bookstore_dev_db
 
+    env:
+      DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1 [::1]"
+      SECRET_KEY: "dev-secret-key"
+      SQL_ENGINE: django.db.backends.postgresql
+      SQL_DATABASE: bookstore_dev_db
+      SQL_USER: bookstore_dev
+      SQL_PASSWORD: bookstore_dev
+      SQL_HOST: db
+      SQL_PORT: 5432
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: 3.13
+          python-version: 3.8
 
-      - name: Install Poetry
+      - name: Install poetry
         run: |
           pip install -U pip
           pip install poetry
         env:
           POETRY_VIRTUALENVS_CREATE: false
 
-      - name: Install dependencies
-        run: poetry install
+      - name: View poetry --help
+        run: poetry --help
 
-      - name: Copy environment variables
+      - name: Install dependencies
+        shell: bash
+        run: python -m poetry install
+
+      - name: Copiar variáveis de ambiente
         run: cp ./env.dev .env
 
       - name: Esperar banco de dados
@@ -51,13 +65,10 @@ jobs:
             sleep 3
           done
 
-      - name: Run Migrations
-        run: poetry run python manage.py migrate --noinput
-
-      - name: Run Tests
+      - name: Test
         run: poetry run python manage.py test
 
-      - name: Wemake Python Styleguide
+      - name: Wemake Python Stylguide
         uses: wemake-services/wemake-python-styleguide@0.16.0
         continue-on-error: true
         with:
