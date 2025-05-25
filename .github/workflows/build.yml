@@ -32,6 +32,9 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
+      - name: Copiar variáveis de ambiente
+        run: cp env.dev .env
+
       - name: Run migrations
         run: poetry run python manage.py migrate --noinput
 
