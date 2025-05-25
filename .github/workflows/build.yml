@@ -12,16 +12,16 @@ jobs:
       db:
         image: postgres:16
         env:
-          POSTGRES_USER: postgres
-          POSTGRES_PASSWORD: password
-          POSTGRES_DB: bookstore
+          POSTGRES_USER: bookstore_dev
+          POSTGRES_PASSWORD: bookstore_dev
+          POSTGRES_DB: bookstore_dev_db
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd="pg_isready -U bookstore_dev"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
 
     strategy:
       fail-fast: false
@@ -56,7 +56,7 @@ jobs:
       - name: Esperar banco de dados
         run: |
           for i in {1..10}; do
-            pg_isready -h db -p 5432 -U postgres && break
+            pg_isready -h db -p 5432 -U bookstore_dev && break
             echo "Aguardando PostgreSQL..."
             sleep 3
           done
