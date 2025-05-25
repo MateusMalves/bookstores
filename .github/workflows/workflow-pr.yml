@@ -1,18 +1,36 @@
 name: Python Pull Request Workflow
-on: [pull_request]
-jobs:
 
+on: [pull_request]
+
+jobs:
   qa:
     name: Quality check
     runs-on: ubuntu-22.04
+
+    services:
+      db:
+        image: postgres:16
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U bookstore_dev"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+        env:
+          POSTGRES_USER: bookstore_dev
+          POSTGRES_PASSWORD: bookstore_dev
+          POSTGRES_DB: bookstore_dev_db
+
     steps:
       - uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: 3.13
 
-      - name: Install poetry
+      - name: Install Poetry
         run: |
           pip install -U pip
           pip install poetry
@@ -22,13 +40,13 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Copiar variáveis de ambiente
+      - name: Copy environment variables
         run: cp ./env.dev .env
 
-      - name: Test
+      - name: Run Tests
         run: poetry run python manage.py test
 
-      - name: Wemake Python Stylguide
+      - name: Wemake Python Styleguide
         uses: wemake-services/wemake-python-styleguide@0.16.0
         continue-on-error: true
         with:

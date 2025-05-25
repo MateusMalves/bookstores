@@ -7,6 +7,22 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DJANGO_ALLOWED_HOSTS: "localhost 127.0.0.1 [::1]"
+
+    services:
+      db:
+        image: postgres:13
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: bookstore
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     strategy:
       fail-fast: false
       matrix:
