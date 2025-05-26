@@ -1,6 +1,10 @@
 name: Python Pull Request Workflow
 
-on: [pull_request] 
+on: [pull_request]
+
+permissions:
+  contents: read
+  pull-requests: write
 
 jobs:
   qa:
@@ -29,7 +33,7 @@ jobs:
       SQL_DATABASE: bookstore_dev_db
       SQL_USER: bookstore_dev
       SQL_PASSWORD: bookstore_dev
-      SQL_HOST: db
+      SQL_HOST: localhost
       SQL_PORT: 5432
 
     steps:
@@ -60,7 +64,7 @@ jobs:
       - name: Esperar banco de dados
         run: |
           for i in {1..10}; do
-            pg_isready -h db -p 5432 -U bookstore_dev && break
+            pg_isready -h localhost -p 5432 -U bookstore_dev && break
             echo "Aguardando PostgreSQL..."
             sleep 3
           done
